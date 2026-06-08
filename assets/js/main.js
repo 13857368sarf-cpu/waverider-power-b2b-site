@@ -1,5 +1,5 @@
 document.querySelector('.nav-toggle')?.addEventListener('click',()=>document.querySelector('.nav-links')?.classList.toggle('open'));
-const WA='8613800000000';
+const WA='8618292556018';
 document.getElementById('quoteForm')?.addEventListener('submit',function(e){
   e.preventDefault();
   const data=Object.fromEntries(new FormData(this).entries());

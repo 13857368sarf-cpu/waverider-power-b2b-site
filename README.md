@@ -18,8 +18,8 @@ Static English B2B independent website for outboard motors and marine spare part
 5. Output directory: `/`.
 
 ## Required edits before launch
-- Replace WhatsApp number in `assets/js/main.js` and all `https://wa.me/8613800000000` links.
-- Replace email `sales@waveriderpower.com`.
+- Current WhatsApp: `+86 182 9255 6018` (`https://wa.me/8618292556018`).
+- Current email: `13857368sarf@gmail.com`.
 - Replace canonical domain in HTML files and `sitemap.xml` after final domain is confirmed.
 - Upload larger catalog PDFs or manuals to Cloudflare R2 and link them from product pages.
 
