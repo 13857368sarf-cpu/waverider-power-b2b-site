@@ -1,0 +1,24 @@
+const OUTBOX_KEY='waverider_inquiry_outbox';
+const MATERIAL_KEY='waverider_materials';
+const TOKEN_KEY='waverider_admin_token';
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+function jsonGet(k,f=[]){try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(f))}catch{return f}}
+function jsonSet(k,v){localStorage.setItem(k,JSON.stringify(v))}
+function esc(v){return String(v||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function download(name,text,type='text/plain'){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();URL.revokeObjectURL(a.href)}
+$$('.admin-tab').forEach(btn=>btn.addEventListener('click',()=>{$$('.admin-tab').forEach(b=>b.classList.remove('active'));$$('.admin-panel').forEach(p=>p.classList.remove('active'));btn.classList.add('active');$('#'+btn.dataset.tab).classList.add('active')}));
+$('#saveToken')?.addEventListener('click',()=>{const current=localStorage.getItem(TOKEN_KEY)||'';const token=prompt('Admin token from Vercel ADMIN_TOKEN:',current);if(token!==null)localStorage.setItem(TOKEN_KEY,token.trim())});
+async function loadRemoteLeads(){const token=localStorage.getItem(TOKEN_KEY)||'';if(!token)return null;const res=await fetch('/api/inquiries',{headers:{'x-admin-token':token}});if(!res.ok)throw new Error(await res.text());return await res.json()}
+function normalizeIssue(issue){const body=issue.body||'';const get=k=>(body.match(new RegExp('^'+k+':\\s*(.*)$','mi'))||[])[1]||'';return {createdAt:issue.created_at,name:get('name'),company:get('company'),country:get('country'),productInterest:get('productInterest'),quantity:get('quantity'),email:get('email'),phone:get('phone')}}
+function renderLeads(rows){$('#leadRows').innerHTML=rows.map(r=>`<tr><td>${esc((r.createdAt||'').slice(0,10))}</td><td>${esc(r.name)}</td><td>${esc(r.company)}</td><td>${esc(r.country)}</td><td>${esc(r.productInterest)}</td><td>${esc(r.quantity)}</td><td>${esc(r.email||r.phone)}</td></tr>`).join('')||'<tr><td colspan="7">No leads yet.</td></tr>'}
+async function refreshLeads(){const status=$('#leadStatus');let rows=jsonGet(OUTBOX_KEY,[]);try{const remote=await loadRemoteLeads();if(remote?.items){rows=remote.items.map(normalizeIssue);status.textContent='Loaded centralized leads from GitHub Issues.';status.className='form-note success'}}catch(e){status.textContent='Remote backend not ready or token invalid. Showing local browser outbox.';status.className='form-note error'}renderLeads(rows);return rows}
+$('#refreshLeads')?.addEventListener('click',refreshLeads);
+$('#exportCsv')?.addEventListener('click',async()=>{const rows=await refreshLeads();const head=['createdAt','name','company','email','phone','country','buyerType','productInterest','quantity','boatType','configuration','message'];const csv=[head.join(','),...rows.map(r=>head.map(k=>'"'+String(r[k]||'').replace(/"/g,'""')+'"').join(','))].join('\n');download('waverider-inquiries.csv',csv,'text/csv')});
+$('#clearLocal')?.addEventListener('click',()=>{if(confirm('Clear local outbox in this browser?')){localStorage.removeItem(OUTBOX_KEY);refreshLeads()}});
+function renderMaterials(){const rows=jsonGet(MATERIAL_KEY,[]);$('#materialRows').innerHTML=rows.map((m,i)=>`<tr><td>${esc(m.title)}</td><td>${esc(m.type)}</td><td>${esc(m.category)}</td><td><a href="${esc(m.url)}" target="_blank">Open</a></td><td><button class="danger-btn" data-del="${i}">Delete</button></td></tr>`).join('')||'<tr><td colspan="5">No materials yet.</td></tr>';$$('[data-del]').forEach(b=>b.onclick=()=>{const list=jsonGet(MATERIAL_KEY,[]);list.splice(Number(b.dataset.del),1);jsonSet(MATERIAL_KEY,list);renderMaterials()})}
+$('#materialForm')?.addEventListener('submit',e=>{e.preventDefault();const item=Object.fromEntries(new FormData(e.currentTarget).entries());item.createdAt=new Date().toISOString();const list=jsonGet(MATERIAL_KEY,[]);list.unshift(item);jsonSet(MATERIAL_KEY,list);e.currentTarget.reset();renderMaterials()});
+$('#exportMaterials')?.addEventListener('click',()=>download('waverider-materials.json',JSON.stringify(jsonGet(MATERIAL_KEY,[]),null,2),'application/json'));
+$('#importMaterials')?.addEventListener('click',()=>$('#importFile').click());
+$('#importFile')?.addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;jsonSet(MATERIAL_KEY,JSON.parse(await file.text()));renderMaterials()});
+refreshLeads();renderMaterials();

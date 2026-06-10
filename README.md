@@ -30,3 +30,14 @@ Static English B2B independent website for outboard motors and marine spare part
 - `contact.html` WhatsApp quote form
 - `assets/images/products/` Product photos
 - `robots.txt` and `sitemap.xml` for Google indexing
+
+## Admin & lead backend
+- Admin panel: `/admin/`
+- Contact form: posts to `/api/inquiries` and also opens WhatsApp for fast follow-up.
+- Without backend variables, inquiries are kept in the browser outbox and can be exported from admin.
+- To enable centralized lead collection on Vercel, add Environment Variables:
+  - `ADMIN_TOKEN`: private token for admin API access
+  - `GITHUB_TOKEN`: GitHub token with permission to create/list repo issues
+  - `GITHUB_REPO`: `13857368sarf-cpu/waverider-power-b2b-site`
+- After variables are added, redeploy Vercel. New inquiries will be saved as GitHub Issues labeled `inquiry`.
+- Material manager stores a browser-side material library and exports JSON for backup or later Cloudflare R2 migration.
