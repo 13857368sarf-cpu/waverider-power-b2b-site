@@ -1,4 +1,4 @@
-# WaveRider Power B2B Website
+# Kanglongsi Marine B2B Website
 
 Static English B2B independent website for outboard motors and marine spare parts.
 
