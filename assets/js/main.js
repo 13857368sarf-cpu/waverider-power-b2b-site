@@ -3,7 +3,7 @@ const WA='8618292556018';
 const OUTBOX_KEY='waverider_inquiry_outbox';
 function readOutbox(){try{return JSON.parse(localStorage.getItem(OUTBOX_KEY)||'[]')}catch{return []}}
 function saveOutbox(item){const list=readOutbox();list.unshift(item);localStorage.setItem(OUTBOX_KEY,JSON.stringify(list.slice(0,200)))}
-function inquiryLines(data){return ['New B2B Inquiry - Kanglongsi Marine',...Object.entries(data).map(([k,v])=>`${k}: ${v||'-'}`)]}
+function inquiryLines(data){return ['New B2B Inquiry - WaveRider Power',...Object.entries(data).map(([k,v])=>`${k}: ${v||'-'}`)]}
 const interest=new URLSearchParams(location.search).get('interest');
 if(interest){
   const productField=document.querySelector('[name="productInterest"]');
